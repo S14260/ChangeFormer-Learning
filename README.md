@@ -1,245 +1,232 @@
-## ChangeFormer: A Transformer-Based Siamese Network for Change Detection
-> [A Transformer-Based Siamese Network for Change Detection](https://arxiv.org/abs/2201.01293)
+# ChangeFormer: 基于Transformer的变化检测网络
 
-> [Wele Gedara Chaminda Bandara](https://www.wgcban.com/), and [Vishal M. Patel](https://engineering.jhu.edu/vpatel36/sciencex_teams/vishalpatel/)
+> 论文: [A Transformer-Based Siamese Network for Change Detection](https://arxiv.org/abs/2201.01293)
 
-> Presented at [IGARSS-22](https://www.igarss2022.org/default.php), Kuala Lumpur, Malaysia.
+> 作者: [Wele Gedara Chaminda Bandara](https://www.wgcban.com/) 和 [Vishal M. Patel](https://engineering.jhu.edu/vpatel36/sciencex_teams/vishalpatel/)
 
-Useful links:
-- Paper (published): https://ieeexplore.ieee.org/document/9883686
-- Paper (ArXiv): https://arxiv.org/abs/2201.01293
-- Presentation (in YouTube): https://www.youtube.com/watch?v=SkiNoTrSmQM
+> 发表于 [IGARSS-22](https://www.igarss2022.org/default.php)，马来西亚吉隆坡
 
-## My other Change Detection repos:
+## 📖 项目简介
 
-- Change Detection with Denoising Diffusion Probabilistic Models: [DDPM-CD](https://github.com/wgcban/ddpm-cd)
-- Semi-supervised Change Detection: [SemiCD](https://github.com/wgcban/SemiCD)
-- Unsupervised Change Detection: [Metric-CD](https://github.com/wgcban/Metric-CD)
+这是一个基于 **Transformer** 的遥感影像变化检测项目，能够识别两期卫星影像中的地物变化（如建筑物新增/拆除）。
 
+### 适用场景
+- 🏗️ 城市建设监测
+- 🌾 农用地变化检测
+- 🏘️ 违建识别
+- 🌍 灾害评估
 
-## Network Architecture
-![image-20210228153142126](./images/IGARS_ChangeFormer.jpeg)
+## 🔗 相关链接
 
-## Quantitative & Qualitative Results on LEVIR-CD and DSIFN-CD
-![image-20210228153142126](./images/IGARS_ChangeFormer-LEVIR_DSFIN_both.png)
+- 📄 论文 (IEEE): https://ieeexplore.ieee.org/document/9883686
+- 📄 论文 (ArXiv): https://arxiv.org/abs/2201.01293
+- 🎬 演示视频: https://www.youtube.com/watch?v=SkiNoTrSmQM
 
-# Usage
-## Requirements
+## 🏗️ 网络架构
+
+![ChangeFormer架构](./images/IGARS_ChangeFormer.jpeg)
+
+## 📊 实验结果
+
+![LEVIR-CD和DSIFN-CD结果](./images/IGARS_ChangeFormer-LEVIR_DSFIN_both.png)
+
+---
+
+## 🚀 快速开始
+
+### 环境要求
 
 ```
 Python 3.8.0
-pytorch 1.10.1
+PyTorch 1.10.1
 torchvision 0.11.2
-einops  0.3.2
+einops 0.3.2
 ```
 
-- Please see `requirements.txt` for all the other requirements.
-
-## Setting up conda environment: 
-
-Create a virtual ``conda`` environment named ``ChangeFormer`` with the following command:
+### 安装环境
 
 ```bash
+# 创建conda环境
 conda create --name ChangeFormerV5 --file requirements.txt
 conda activate ChangeFormerV5
 ```
 
-## Installation
+### 克隆项目
 
-Clone this repo:
-
-```shell
-git clone https://github.com/wgcban/ChangeFormer.git
-cd ChangeFormerV5
+```bash
+git clone https://github.com/S14260/ChangeFormer-Learning.git
+cd ChangeFormer-Learning
 ```
 
-## Quick Start on LEVIR dataset
+---
 
-We have some samples from the [LEVIR-CD](https://justchenhao.github.io/LEVIR/) dataset in the folder `samples_LEVIR` for a quick start.
+## 📁 数据集准备
 
-Firstly, you can download our ChangeFormerV6 pretrained model——by [`Github-LEVIR-Pretrained`](https://github.com/wgcban/ChangeFormer/releases/download/v0.1.0/CD_ChangeFormerV6_LEVIR_b16_lr0.0001_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256.zip). 
+### 数据目录结构
 
-Place it in `checkpoints/ChangeFormer_LEVIR/`.
+```
+数据集文件夹/
+├─ A/          # t1时期影像
+├─ B/          # t2时期影像
+├─ label/      # 变化标签图（黑白）
+└─ list/       # 文件列表
+    ├─ train.txt   # 训练集文件名列表
+    ├─ val.txt     # 验证集文件名列表
+    └─ test.txt    # 测试集文件名列表
+```
 
-Run a demo to get started as follows:
+### 下载数据集
 
-```python
+**LEVIR-CD-256 数据集**: [点击下载](https://www.dropbox.com/s/18fb5jo0npu5evm/LEVIR-CD256.zip)
+
+**DSIFN-CD-256 数据集**: [点击下载](https://www.dropbox.com/s/18fb5jo0npu5evm/LEVIR-CD256.zip)
+
+---
+
+## 🎯 快速演示
+
+### 在 LEVIR 数据集上测试
+
+1. 下载预训练模型: [`Github-LEVIR-Pretrained`](https://github.com/wgcban/ChangeFormer/releases/download/v0.1.0/CD_ChangeFormerV6_LEVIR_b16_lr0.0001_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256.zip)
+
+2. 将模型放置到 `checkpoints/ChangeFormer_LEVIR/` 目录
+
+3. 运行演示:
+```bash
 python demo_LEVIR.py
 ```
 
-You can find the prediction results in `samples/predict_LEVIR`.
+4. 结果保存在 `samples_LEVIR/predict_CD_ChangeFormerV6/`
 
+### 在 DSIFN 数据集上测试
 
-## Quick Start on DSIFN dataset
+1. 下载预训练模型: [`Github-DSIFN-Pretrained`](https://github.com/wgcban/ChangeFormer/releases/download/v0.1.0/CD_ChangeFormerV6_DSIFN_b16_lr0.00006_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256.zip)
 
-We have some samples from the [`DSIFN-CD`](https://github.com/GeoZcx/A-deeply-supervised-image-fusion-network-for-change-detection-in-remote-sensing-images/tree/master/dataset) dataset in the folder `samples_DSIFN` for a quick start.
+2. 将模型放置到 `checkpoints/ChangeFormer_DSIFN/` 目录
 
-Download our ChangeFormerV6 pretrained model——by [`Github`](https://github.com/wgcban/ChangeFormer/releases/download/v0.1.0/CD_ChangeFormerV6_DSIFN_b16_lr0.00006_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256.zip). After downloaded the pretrained model, you can put it in `checkpoints/ChangeFormer_DSIFN/`.
-
-Run the demo to get started as follows:
-
-```python
+3. 运行演示:
+```bash
 python demo_DSIFN.py
 ```
 
-You can find the prediction results in `samples/predict_DSIFN`.
+---
 
-## Training on LEVIR-CD
+## 🏋️ 模型训练
 
-When we initialy train our ChangeFormer, we initialized some parameters of the network with a model pre-trained on the RGB segmentation (ADE 160k dataset) to get faster convergence.
+### 训练参数说明
 
-You can download the pre-trained model [`Github-LEVIR-Pretrained`](https://github.com/wgcban/ChangeFormer/releases/download/v0.1.0/CD_ChangeFormerV6_LEVIR_b16_lr0.0001_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256.zip).
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `batch_size` | 16 | 批次大小 |
+| `lr` | 0.0001 | 学习率 |
+| `max_epochs` | 200 | 训练轮数 |
+| `img_size` | 256 | 输入图像尺寸 |
+| `embed_dim` | 256 | Transformer嵌入维度 |
+| `net_G` | ChangeFormerV6 | 网络版本 |
+| `optimizer` | adamw | 优化器 (sgd/adam/adamw) |
+| `loss` | ce | 损失函数 (ce/fl/miou) |
+
+### 训练命令
+
+```bash
+python main_cd.py \
+    --data_name LEVIR \
+    --batch_size 16 \
+    --lr 0.0001 \
+    --max_epochs 200 \
+    --net_G ChangeFormerV6 \
+    --optimizer adamw \
+    --loss ce \
+    --embed_dim 256
 ```
+
+### 使用预训练权重加速收敛
+
+```bash
+# 下载预训练的SegFormer权重
 wget https://www.dropbox.com/s/undtrlxiz7bkag5/pretrained_changeformer.pt
+
+# 训练时指定预训练路径
+python main_cd.py --pretrain path/to/pretrained_changeformer.pt ...
 ```
 
-Then, update the path to the pre-trained model by updating the ``path`` argument in the ``run_ChangeFormer_LEVIR.sh``.
-Here:
-https://github.com/wgcban/ChangeFormer/blob/a3eca2b1ec5d0d2628ea2e0b6beae85630ba79d4/scripts/run_ChangeFormer_LEVIR.sh#L28
+---
 
-You can find the training script `run_ChangeFormer_LEVIR.sh` in the folder `scripts`. You can run the script file by `sh scripts/run_ChangeFormer_LEVIR.sh` in the command environment.
+## 📈 模型评估
 
-The detailed script file `run_ChangeFormer_LEVIR.sh` is as follows:
-
-```cmd
-#!/usr/bin/env bash
-
-#GPUs
-gpus=0
-
-#Set paths
-checkpoint_root=/media/lidan/ssd2/ChangeFormer/checkpoints
-vis_root=/media/lidan/ssd2/ChangeFormer/vis
-data_name=LEVIR
-
-
-img_size=256    
-batch_size=16   
-lr=0.0001         
-max_epochs=200
-embed_dim=256
-
-net_G=ChangeFormerV6        #ChangeFormerV6 is the finalized verion
-
-lr_policy=linear
-optimizer=adamw                 #Choices: sgd (set lr to 0.01), adam, adamw
-loss=ce                         #Choices: ce, fl (Focal Loss), miou
-multi_scale_train=True
-multi_scale_infer=False
-shuffle_AB=False
-
-#Initializing from pretrained weights
-pretrain=/media/lidan/ssd2/ChangeFormer/pretrained_segformer/segformer.b2.512x512.ade.160k.pth
-
-#Train and Validation splits
-split=train         #train
-split_val=test      #test, val
-project_name=CD_${net_G}_${data_name}_b${batch_size}_lr${lr}_${optimizer}_${split}_${split_val}_${max_epochs}_${lr_policy}_${loss}_multi_train_${multi_scale_train}_multi_infer_${multi_scale_infer}_shuffle_AB_${shuffle_AB}_embed_dim_${embed_dim}
-
-CUDA_VISIBLE_DEVICES=1 python main_cd.py --img_size ${img_size} --loss ${loss} --checkpoint_root ${checkpoint_root} --vis_root ${vis_root} --lr_policy ${lr_policy} --optimizer ${optimizer} --pretrain ${pretrain} --split ${split} --split_val ${split_val} --net_G ${net_G} --multi_scale_train ${multi_scale_train} --multi_scale_infer ${multi_scale_infer} --gpu_ids ${gpus} --max_epochs ${max_epochs} --project_name ${project_name} --batch_size ${batch_size} --shuffle_AB ${shuffle_AB} --data_name ${data_name}  --lr ${lr} --embed_dim ${embed_dim}
+```bash
+python eval_cd.py \
+    --data_name LEVIR \
+    --net_G ChangeFormerV6 \
+    --split test \
+    --checkpoint_name best_ckpt.pt
 ```
 
-## Training on DSIFN-CD
+---
 
-Follow the similar procedure mentioned for LEVIR-CD. Use `run_ChangeFormer_DSIFN.sh` in `scripts` folder to train on DSIFN-CD.
-
-## Evaluate on LEVIR
-
-You can find the evaluation script `eval_ChangeFormer_LEVIR.sh` in the folder `scripts`. You can run the script file by `sh scripts/eval_ChangeFormer_LEVIR.sh` in the command environment.
-
-The detailed script file `eval_ChangeFormer_LEVIR.sh` is as follows:
-
-```cmd
-#!/usr/bin/env bash
-
-gpus=0
-
-data_name=LEVIR
-net_G=ChangeFormerV6 #This is the best version
-split=test
-vis_root=/media/lidan/ssd2/ChangeFormer/vis
-project_name=CD_ChangeFormerV6_LEVIR_b16_lr0.0001_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256
-checkpoints_root=/media/lidan/ssd2/ChangeFormer/checkpoints
-checkpoint_name=best_ckpt.pt
-img_size=256
-embed_dim=256 #Make sure to change the embedding dim (best and default = 256)
-
-CUDA_VISIBLE_DEVICES=0 python eval_cd.py --split ${split} --net_G ${net_G} --embed_dim ${embed_dim} --img_size ${img_size} --vis_root ${vis_root} --checkpoints_root ${checkpoints_root} --checkpoint_name ${checkpoint_name} --gpu_ids ${gpus} --project_name ${project_name} --data_name ${data_name}
-```
-
-## Evaluate on DSIFN
-
-Follow the same evaluation procedure mentioned for LEVIR-CD. You can find the evaluation script `eval_ChangeFormer_DSFIN.sh` in the folder `scripts`. You can run the script file by `sh scripts/eval_ChangeFormer_DSIFN.sh` in the command environment.
-
-### Dataset Preparation
-
-## Data structure
+## 📂 项目结构
 
 ```
-Change detection data set with pixel-level binary labels；
-├─A
-├─B
-├─label
-└─list
+ChangeFormer/
+├── models/
+│   ├── ChangeFormer.py      # ChangeFormer网络定义
+│   ├── trainer.py           # 训练器
+│   ├── evaluator.py         # 评估器
+│   └── networks.py          # 网络构建
+├── main_cd.py               # 训练入口
+├── eval_cd.py               # 评估入口
+├── demo_LEVIR.py            # LEVIR演示脚本
+├── demo_DSIFN.py            # DSIFN演示脚本
+├── data_config.py           # 数据集配置
+├── utils.py                 # 工具函数
+├── checkpoints/             # 模型权重（不上传）
+├── vis/                     # 可视化结果（不上传）
+└── scripts/                 # 训练/评估脚本
 ```
 
-`A`: images of t1 phase;
+---
 
-`B`:images of t2 phase;
+## 🔧 本项目的改进
 
-`label`: label maps;
+在原项目基础上，本项目做了以下改进：
 
-`list`: contains `train.txt, val.txt and test.txt`, each file records the image names (XXX.png) in the change detection dataset.
+### 1. 兼容性修复
+- 修复 `np.str` 弃用问题（改为 `str`）
+- 修复 PyTorch `weights_only` 参数警告
+- 修复 `F.interpolate` 使用 `size` 替代 `scale_factor` 的兼容性问题
 
-## Links to processed datsets used for train/val/test
+### 2. Windows 环境适配
+- 修改文件路径为 Windows 格式
+- 适配本地 checkpoint 存储路径
 
-You can download the processed `LEVIR-CD` and `DSIFN-CD` datasets by the DropBox through the following here:
+### 3. 添加中文注释
+- 在训练流程中添加详细中文注释
+- 帮助理解训练、验证、保存三个阶段
 
-- LEVIR-CD-256: [`click here to download`](https://www.dropbox.com/s/18fb5jo0npu5evm/LEVIR-CD256.zip)
-- DSIFN-CD-256: [`click here to download`](https://www.dropbox.com/s/18fb5jo0npu5evm/LEVIR-CD256.zip)
+---
 
-Since the file sizes are large, I recommed to use command line and cosider downloading the zip file as follows (in linux):
+## 📝 引用
 
-To download LEVIR-CD dataset run following command in linux-terminal:
-```cmd
-wget https://www.dropbox.com/s/18fb5jo0npu5evm/LEVIR-CD256.zip
-```
-To download DSIFN-CD dataset run following command in linux-terminal:
-```cmd
-wget https://www.dropbox.com/s/18fb5jo0npu5evm/LEVIR-CD256.zip
-```
-
-For your reference, I have also attached the inks to original LEVIR-CD and DSIFN-CD here: [`LEVIR-CD`](https://justchenhao.github.io/LEVIR/) and [`DSIFN-CD`](https://github.com/GeoZcx/A-deeply-supervised-image-fusion-network-for-change-detection-in-remote-sensing-images/tree/master/dataset).
-
-### Other useful notes
-#### ChangeFormer for multi-class change detection
-If you wish to use ChangeFormer for multi-class change detection, you will need to make a few modifications to the existing codebase, which is designed for binary change detection. There are many discussions in the issues section. The required modifications are (https://github.com/wgcban/ChangeFormer/issues/93#issuecomment-1918609871):
-1. `run_ChangeFormer_cd.sh`: n_class=8 and make it a hyperparameter to python main.py
-2. `models/networks.py`: net = ChangeFormerV6(embed_dim=args.embed_dim, output_nc=args.n_class)
-3. `models/basic_model.py`: Comment out: pred_vis = pred * 255, i.e., modifications to visualisation processing
-4. `models/trainer.py`: Modify: ConfuseMatrixMeter(n_class=self.n_class)
-
-### License
-
-Code is released for non-commercial and research purposes **only**. For commercial purposes, please contact the authors.
-
-### Citation
-
-If you use this code for your research, please cite our paper:
+如果本项目对您的研究有帮助，请引用原论文：
 
 ```bibtex
 @INPROCEEDINGS{9883686,
   author={Bandara, Wele Gedara Chaminda and Patel, Vishal M.},
-  booktitle={IGARSS 2022 - 2022 IEEE International Geoscience and Remote Sensing Symposium}, 
-  title={A Transformer-Based Siamese Network for Change Detection}, 
+  booktitle={IGARSS 2022 - 2022 IEEE International Geoscience and Remote Sensing Symposium},
+  title={A Transformer-Based Siamese Network for Change Detection},
   year={2022},
-  volume={},
-  number={},
   pages={207-210},
-  doi={10.1109/IGARSS46834.2022.9883686}}
+  doi={10.1109/IGARSS46834.2022.9883686}
+}
 ```
 
-## Disclaimer
-Appreciate the work from the following repositories:
-- https://github.com/justchenhao/BIT_CD (Our ChangeFormer is implemented on the code provided in this repository)
+---
 
+## 📄 许可证
+
+本代码仅用于非商业和研究目的。商业用途请联系原作者。
+
+## 🙏 致谢
+
+感谢以下项目的支持：
+- [BIT_CD](https://github.com/justchenhao/BIT_CD) - ChangeFormer 基于此代码库实现
