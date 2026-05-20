@@ -40,8 +40,8 @@ einops  0.3.2
 Create a virtual ``conda`` environment named ``ChangeFormer`` with the following command:
 
 ```bash
-conda create --name ChangeFormer --file requirements.txt
-conda activate ChangeFormer
+conda create --name ChangeFormerV5 --file requirements.txt
+conda activate ChangeFormerV5
 ```
 
 ## Installation
@@ -50,7 +50,7 @@ Clone this repo:
 
 ```shell
 git clone https://github.com/wgcban/ChangeFormer.git
-cd ChangeFormer
+cd ChangeFormerV5
 ```
 
 ## Quick Start on LEVIR dataset

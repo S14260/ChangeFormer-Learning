@@ -141,22 +141,22 @@ def define_G(args, init_type='normal', init_gain=0.02, gpu_ids=[]):
                              with_pos='learned', enc_depth=1, dec_depth=8, decoder_dim_head=8)
 
     elif args.net_G == 'ChangeFormerV1':
-        net = ChangeFormerV1() #ChangeFormer with Transformer Encoder and Convolutional Decoder
+        net = ChangeFormerV1() #ChangeFormerV5 with Transformer Encoder and Convolutional Decoder
     
     elif args.net_G == 'ChangeFormerV2':
-        net = ChangeFormerV2() #ChangeFormer with Transformer Encoder and Convolutional Decoder
+        net = ChangeFormerV2() #ChangeFormerV5 with Transformer Encoder and Convolutional Decoder
 
     elif args.net_G == 'ChangeFormerV3':
-        net = ChangeFormerV3() #ChangeFormer with Transformer Encoder and Convolutional Decoder (Fuse)
+        net = ChangeFormerV3() #ChangeFormerV5 with Transformer Encoder and Convolutional Decoder (Fuse)
 
     elif args.net_G == 'ChangeFormerV4':
-        net = ChangeFormerV4() #ChangeFormer with Transformer Encoder and Convolutional Decoder (Fuse)
+        net = ChangeFormerV4() #ChangeFormerV5 with Transformer Encoder and Convolutional Decoder (Fuse)
     
     elif args.net_G == 'ChangeFormerV5':
-        net = ChangeFormerV5(embed_dim=args.embed_dim) #ChangeFormer with Transformer Encoder and Convolutional Decoder (Fuse)
+        net = ChangeFormerV5(embed_dim=args.embed_dim) #ChangeFormerV5 with Transformer Encoder and Convolutional Decoder (Fuse)
 
     elif args.net_G == 'ChangeFormerV6':
-        net = ChangeFormerV6(embed_dim=args.embed_dim) #ChangeFormer with Transformer Encoder and Convolutional Decoder (Fuse)
+        net = ChangeFormerV6(embed_dim=args.embed_dim) #ChangeFormerV5 with Transformer Encoder and Convolutional Decoder (Fuse)
     
     elif args.net_G == "SiamUnet_diff":
         #Implementation of ``Fully convolutional siamese networks for change detection''

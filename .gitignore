@@ -1,4 +1,50 @@
+# Python
+__pycache__/
 *.pyc
-*.DS_Store
-./sha256
-./sha256.pub
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# PyCharm
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Deep Learning Weights
+*.pth
+*.pt
+*.ckpt
+
+# Numpy arrays (训练记录)
+*.npy
+*.npz
+
+# Training Outputs
+checkpoints/
+runs/
+logs/
+output/
+outputs/
+results/
+
+# Visualization outputs
+vis/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# CUDA / temp
+*.tmp
+*.log
+
+# Training logs
+log.txt
+train_acc.npy
+val_acc.npy
+scores_dict.npy

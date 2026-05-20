@@ -23,7 +23,7 @@ def get_args():
     parser = ArgumentParser()
     parser.add_argument('--project_name', default='CD_ChangeFormerV6_LEVIR_b16_lr0.0001_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256', type=str)
     parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
-    parser.add_argument('--checkpoint_root', default='/media/lidan/ssd2/ChangeFormer/checkpoints/', type=str)
+    parser.add_argument('--checkpoint_root', default=r'E:\changeformer\ChangeFormer\checkpoints\ChangeFormer_LEVIR', type=str)
     parser.add_argument('--output_folder', default='samples_LEVIR/predict_CD_ChangeFormerV6', type=str)
 
     # data

@@ -10,9 +10,9 @@ the main function for training the CD networks
 
 
 def train(args):
-    dataloaders = utils.get_loaders(args)
-    model = CDTrainer(args=args, dataloaders=dataloaders)
-    model.train_models()
+    dataloaders = utils.get_loaders(args)  #准备数据集
+    model = CDTrainer(args=args, dataloaders=dataloaders)  #创建训练器
+    model.train_models()  #开始训练循环
 
 
 def test(args):
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # ------------
     parser = ArgumentParser()
     parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
-    parser.add_argument('--project_name', default='ChangeFormer', type=str)
+    parser.add_argument('--project_name', default='ChangeFormerV5', type=str)
     parser.add_argument('--checkpoint_root', default='checkpoints', type=str)
     parser.add_argument('--vis_root', default='vis', type=str)
 

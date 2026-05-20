@@ -133,7 +133,7 @@ class CDTrainer():
             self.logger.write('loading last checkpoint...\n')
             # load the entire checkpoint
             checkpoint = torch.load(os.path.join(self.checkpoint_dir, ckpt_name),
-                                    map_location=self.device)
+                                    map_location=self.device, weights_only=False)
             # update net_G states
             self.net_G.load_state_dict(checkpoint['model_G_state_dict'])
 
@@ -155,7 +155,7 @@ class CDTrainer():
             self.logger.write('\n')
         elif self.args.pretrain is not None:
             print("Initializing backbone weights from: " + self.args.pretrain)
-            self.net_G.load_state_dict(torch.load(self.args.pretrain), strict=False)
+            self.net_G.load_state_dict(torch.load(self.args.pretrain, weights_only=True), strict=False)
             self.net_G.to(self.device)
             self.net_G.eval()
         else:
@@ -317,12 +317,15 @@ class CDTrainer():
 
             ################## train #################
             ##########################################
+            # ============ 1. 训练阶段 ============
+            # 类比：让学生看大量"变化前/后"的卫星图，学习识别变化
             self._clear_cache()
             self.is_training = True
             self.net_G.train()  # Set model to training mode
             # Iterate over data.
             total = len(self.dataloaders['train'])
             self.logger.write('lr: %0.7f\n \n' % self.optimizer_G.param_groups[0]['lr'])
+            #类比：让学生看大量"变化前/后"的卫星图，学习识别变化
             for self.batch_id, batch in tqdm(enumerate(self.dataloaders['train'], 0), total=total):
                 self._forward_pass(batch)
                 # update G
@@ -339,12 +342,15 @@ class CDTrainer():
 
             ################## Eval ##################
             ##########################################
+            # ============ 2. 验证阶段 ============
+            # 类比：用考试题测试学生学得怎么样
             self.logger.write('Begin evaluation...\n')
             self._clear_cache()
             self.is_training = False
             self.net_G.eval()
 
             # Iterate over data.
+
             for self.batch_id, batch in enumerate(self.dataloaders['val'], 0):
                 with torch.no_grad():
                     self._forward_pass(batch)
@@ -353,6 +359,8 @@ class CDTrainer():
 
             ########### Update_Checkpoints ###########
             ##########################################
+            # ============ 3. 保存检查点 ============
+            # 类比：保存学生的"学习进度"
             self._update_val_acc_curve()
             self._update_checkpoints()
 

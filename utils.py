@@ -40,6 +40,7 @@ def get_loaders(args):
     if hasattr(args, 'split_val'):
         split_val = args.split_val
     if args.dataset == 'CDDataset':
+        #创建数据集对象
         training_set = CDDataset(root_dir=root_dir, split=split,
                                  img_size=args.img_size,is_train=True,
                                  label_transform=label_transform)
