@@ -60,6 +60,10 @@ if __name__ == '__main__':
                              'base_transformer_pos_s4_dd8 | '
                              'base_transformer_pos_s4_dd8_dedim8|ChangeFormerV5|SiamUnet_diff')
     parser.add_argument('--loss', default='ce', type=str)
+    parser.add_argument('--loss_weight', nargs='+', type=float, default=None,
+                        help='Class weights for CE loss, e.g. --loss_weight 1.0 3.0')
+    parser.add_argument('--label_smoothing', default=0.0, type=float,
+                        help='Label smoothing factor (0.0 = no smoothing)')
 
     # optimizer
     parser.add_argument('--optimizer', default='sgd', type=str)

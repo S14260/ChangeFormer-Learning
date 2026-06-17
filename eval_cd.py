@@ -49,7 +49,7 @@ def main():
     args.vis_dir = os.path.join(args.vis_root, args.project_name)
     os.makedirs(args.vis_dir, exist_ok=True)
 
-    dataloader = utils.get_loader(args.data_name, img_size=args.img_size,
+    er = utils.get_loader(args.data_name, img_size=args.img_size,
                                   batch_size=args.batch_size, is_train=False,
                                   split=args.split)
     model = CDEvaluator(args=args, dataloader=dataloader)

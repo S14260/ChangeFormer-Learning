@@ -92,7 +92,13 @@ class CDTrainer():
         self.multi_scale_infer = args.multi_scale_infer
         self.weights = tuple(args.multi_pred_weights)
         if args.loss == 'ce':
-            self._pxl_loss = cross_entropy
+            loss_weight = getattr(args, 'loss_weight', None)
+            label_smoothing = getattr(args, 'label_smoothing', 0.0)
+            if loss_weight:
+                weight = torch.tensor(loss_weight).cuda()
+                self._pxl_loss = lambda input, target: cross_entropy(input, target, weight=weight, label_smoothing=label_smoothing)
+            else:
+                self._pxl_loss = lambda input, target: cross_entropy(input, target, label_smoothing=label_smoothing)
         elif args.loss == 'bce':
             self._pxl_loss = losses.binary_ce
         elif args.loss == 'fl':
@@ -155,7 +161,7 @@ class CDTrainer():
             self.logger.write('\n')
         elif self.args.pretrain is not None:
             print("Initializing backbone weights from: " + self.args.pretrain)
-            self.net_G.load_state_dict(torch.load(self.args.pretrain, weights_only=True), strict=False)
+            self.net_G.load_state_dict(torch.load(self.args.pretrain, weights_only=False), strict=False)
             self.net_G.to(self.device)
             self.net_G.eval()
         else:

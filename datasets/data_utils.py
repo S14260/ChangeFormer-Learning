@@ -101,7 +101,7 @@ class CDDataAugmentation:
 
         if self.with_scale_random_crop:
             # rescale
-            scale_range = [1, 1.2]
+            scale_range = [0.8, 1.3]
             target_scale = scale_range[0] + random.random() * (scale_range[1] - scale_range[0])
 
             imgs = [pil_rescale(img, target_scale, order=3) for img in imgs]
@@ -120,7 +120,7 @@ class CDDataAugmentation:
                     for img in imgs]
 
         if self.random_color_tf:
-            color_jitter = transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.3)
+            color_jitter = transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.3)
             imgs_tf = []
             for img in imgs:
                 tf = transforms.ColorJitter(

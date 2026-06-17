@@ -8,7 +8,7 @@ from models.help_funcs import TwoLayerConv2d, save_to_mat
 import torch.nn.functional as F
 
 import timm
-from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+from timm.layers import DropPath, to_2tuple, trunc_normal_
 import types
 import math
 from abc import ABCMeta, abstractmethod
@@ -29,7 +29,7 @@ class EncoderTransformer(nn.Module):
         self.num_classes = num_classes
         self.depths = depths
 
-        # patch embedding definitions
+        # patch embedding definitions   图像 → 小patch
         self.patch_embed1 = OverlapPatchEmbed(img_size=img_size, patch_size=7, stride=4, in_chans=in_chans,
                                               embed_dim=embed_dims[0])
         self.patch_embed2 = OverlapPatchEmbed(img_size=img_size // 4, patch_size=3, stride=2, in_chans=embed_dims[0],
@@ -305,8 +305,8 @@ class Attention(nn.Module):
         head_dim = dim // num_heads
         self.scale = qk_scale or head_dim ** -0.5
 
-        self.q = nn.Linear(dim, dim, bias=qkv_bias)
-        self.kv = nn.Linear(dim, dim * 2, bias=qkv_bias)
+        self.q = nn.Linear(dim, dim, bias=qkv_bias)  # Query: "我想找什么"
+        self.kv = nn.Linear(dim, dim * 2, bias=qkv_bias)  # Key+Value: "我能提供什么"
         self.attn_drop = nn.Dropout(attn_drop)
         self.proj = nn.Linear(dim, dim)
         self.proj_drop = nn.Dropout(proj_drop)
@@ -335,9 +335,11 @@ class Attention(nn.Module):
 
     def forward(self, x, H, W):
         
-        B, N, C = x.shape
+        B, N, C = x.shape  # N=4096个patch
+        # 1. 计算 Query  每个patch生成一个"问题"
         q = self.q(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
 
+        # 2. 计算 Key 和 Value
         if self.sr_ratio > 1:
             x_ = x.permute(0, 2, 1).reshape(B, C, H, W)
             x_ = self.sr(x_).reshape(B, C, -1).permute(0, 2, 1)
@@ -345,12 +347,14 @@ class Attention(nn.Module):
             kv = self.kv(x_).reshape(B, -1, 2, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         else:
             kv = self.kv(x).reshape(B, -1, 2, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
-        k, v = kv[0], kv[1]
+        k, v = kv[0], kv[1]  # 每个patch生成"答案"和"信息"
 
-        attn = (q @ k.transpose(-2, -1)) * self.scale
-        attn = attn.softmax(dim=-1)
+        # 3. 计算注意力分数
+        attn = (q @ k.transpose(-2, -1)) * self.scale  # 问题和答案匹配
+        attn = attn.softmax(dim=-1)  # 归一化成概率
         attn = self.attn_drop(attn)
 
+        # 4. 加权求和    根据注意力分数，聚合其他patch的信息
         x = (attn @ v).transpose(1, 2).reshape(B, N, C)
         x = self.proj(x)
         x = self.proj_drop(x)

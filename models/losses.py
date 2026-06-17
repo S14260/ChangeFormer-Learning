@@ -3,12 +3,13 @@ import torch.nn.functional as F
 import numpy as np
 import torch.nn as nn
 
-def cross_entropy(input, target, weight=None, reduction='mean',ignore_index=255):
+def cross_entropy(input, target, weight=None, reduction='mean', ignore_index=255, label_smoothing=0.0):
     """
     logSoftmax_with_loss
     :param input: torch.Tensor, N*C*H*W
     :param target: torch.Tensor, N*1*H*W,/ N*H*W
     :param weight: torch.Tensor, C
+    :param label_smoothing: float, label smoothing factor (0.0 = no smoothing)
     :return: torch.Tensor [0]
     """
     target = target.long()
@@ -18,7 +19,8 @@ def cross_entropy(input, target, weight=None, reduction='mean',ignore_index=255)
         input = F.interpolate(input, size=target.shape[1:], mode='bilinear',align_corners=True)
 
     return F.cross_entropy(input=input, target=target, weight=weight,
-                           ignore_index=ignore_index, reduction=reduction)
+                           ignore_index=ignore_index, reduction=reduction,
+                           label_smoothing=label_smoothing)
 
 #Focal Loss
 def get_alpha(supervised_loader):

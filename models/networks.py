@@ -41,6 +41,8 @@ def get_scheduler(optimizer, args):
         step_size = args.max_epochs//3
         # args.lr_decay_iters
         scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=0.1)
+    elif args.lr_policy == 'cosine':
+        scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.max_epochs, eta_min=1e-7)
     else:
         return NotImplementedError('learning rate policy [%s] is not implemented', args.lr_policy)
     return scheduler

@@ -7,10 +7,10 @@ class DataConfig:
         self.data_name = data_name
         if data_name == 'LEVIR':
             self.label_transform = "norm"
-            self.root_dir = '/media/lidan/ssd2/CDData/LEVIR-CD256/'
+            self.root_dir = './datasets/LEVIR_CD256'
         elif data_name == 'DSIFN':
             self.label_transform = "norm"
-            self.root_dir = '/media/lidan/ssd2/CDData/DSIFN_256/'
+            self.root_dir = './datasets/DSIFN_CD256/'
         elif data_name == 'WHU':
             self.label_transform = "norm"
             self.root_dir = '/media/lidan/ssd2/CDData/WHU-CD-256/'
@@ -24,6 +24,12 @@ class DataConfig:
             self.root_dir = './samples_LEVIR/'
         elif data_name == 'quick_start_DSIFN':
             self.root_dir = './samples_DSIFN/'
+        elif data_name == 'tianjin_cd':
+            self.label_transform = "norm"
+            self.root_dir = './datasets/tianjin_cd'
+        elif data_name == 'tianjin_wayback':
+            self.label_transform = "norm"
+            self.root_dir = './datasets/tianjin_wayback'
         else:
             raise TypeError('%s has not defined' % data_name)
         return self

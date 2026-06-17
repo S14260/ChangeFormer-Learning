@@ -62,8 +62,13 @@ class ImageDataset(data.Dataset):
         self.root_dir = root_dir
         self.img_size = img_size
         self.split = split  #train | train_aug | val
-        # self.list_path = self.root_dir + '/' + LIST_FOLDER_NAME + '/' + self.list + '.txt'
-        self.list_path = os.path.join(self.root_dir, LIST_FOLDER_NAME, self.split+'.txt')
+        # 标准结构: {root_dir}/{split}/A/，兼容旧结构: {root_dir}/A/
+        split_dir = os.path.join(self.root_dir, self.split)
+        if os.path.isdir(os.path.join(split_dir, IMG_FOLDER_NAME)):
+            self.data_dir = split_dir
+        else:
+            self.data_dir = self.root_dir
+        self.list_path = os.path.join(self.data_dir, LIST_FOLDER_NAME, self.split+'.txt')
         self.img_name_list = load_img_name_list(self.list_path)
 
         self.A_size = len(self.img_name_list)  # get the size of dataset A
@@ -73,6 +78,7 @@ class ImageDataset(data.Dataset):
                 img_size=self.img_size,
                 with_random_hflip=True,
                 with_random_vflip=True,
+                with_random_rot=True,
                 with_scale_random_crop=True,
                 with_random_blur=True,
                 random_color_tf=True
@@ -83,8 +89,8 @@ class ImageDataset(data.Dataset):
             )
     def __getitem__(self, index):
         name = self.img_name_list[index]
-        A_path = get_img_path(self.root_dir, self.img_name_list[index % self.A_size])
-        B_path = get_img_post_path(self.root_dir, self.img_name_list[index % self.A_size])
+        A_path = get_img_path(self.data_dir, self.img_name_list[index % self.A_size])
+        B_path = get_img_post_path(self.data_dir, self.img_name_list[index % self.A_size])
 
         img = np.asarray(Image.open(A_path).convert('RGB'))
         img_B = np.asarray(Image.open(B_path).convert('RGB'))
@@ -108,11 +114,11 @@ class CDDataset(ImageDataset):
 
     def __getitem__(self, index):
         name = self.img_name_list[index]
-        A_path = get_img_path(self.root_dir, self.img_name_list[index % self.A_size])
-        B_path = get_img_post_path(self.root_dir, self.img_name_list[index % self.A_size])
+        A_path = get_img_path(self.data_dir, self.img_name_list[index % self.A_size])
+        B_path = get_img_post_path(self.data_dir, self.img_name_list[index % self.A_size])
         img = np.asarray(Image.open(A_path).convert('RGB'))
         img_B = np.asarray(Image.open(B_path).convert('RGB'))
-        L_path = get_label_path(self.root_dir, self.img_name_list[index % self.A_size])
+        L_path = get_label_path(self.data_dir, self.img_name_list[index % self.A_size])
 
         label = np.array(Image.open(L_path), dtype=np.uint8)
         # if you are getting error because of dim mismatch ad [:,:,0] at the end
