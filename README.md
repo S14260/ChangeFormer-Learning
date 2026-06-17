@@ -1,213 +1,191 @@
-# ChangeFormer: 基于Transformer的变化检测网络
+# ChangeFormer: 基于Transformer的遥感影像变化检测
 
-> 论文: [A Transformer-Based Siamese Network for Change Detection](https://arxiv.org/abs/2201.01293)
+> 原论文: [A Transformer-Based Siamese Network for Change Detection](https://arxiv.org/abs/2201.01293) (IGARSS 2022)
 
-> 作者: [Wele Gedara Chaminda Bandara](https://www.wgcban.com/) 和 [Vishal M. Patel](https://engineering.jhu.edu/vpatel36/sciencex_teams/vishalpatel/)
+## 项目简介
 
-> 发表于 [IGARSS-22](https://www.igarss2022.org/default.php)，马来西亚吉隆坡
+基于 ChangeFormer 预训练模型，对**天津 Wayback 历史遥感影像**进行建筑变化检测的迁移学习与微调。
 
-## 📖 项目简介
-
-这是一个基于 **Transformer** 的遥感影像变化检测项目，能够识别两期卫星影像中的地物变化（如建筑物新增/拆除）。
-
-### 适用场景
-- 🏗️ 城市建设监测
-- 🌾 农用地变化检测
-- 🏘️ 违建识别
-- 🌍 灾害评估
-
-## 🔗 相关链接
-
-- 📄 论文 (IEEE): https://ieeexplore.ieee.org/document/9883686
-- 📄 论文 (ArXiv): https://arxiv.org/abs/2201.01293
-- 🎬 演示视频: https://www.youtube.com/watch?v=SkiNoTrSmQM
-
-## 🏗️ 网络架构
-
-![ChangeFormer架构](./images/IGARS_ChangeFormer.jpeg)
-
-## 📊 实验结果
-
-![LEVIR-CD和DSIFN-CD结果](./images/IGARS_ChangeFormer-LEVIR_DSFIN_both.png)
+### 应用场景
+- 城市建设监测
+- 违建识别
+- 农用地变化检测
+- 灾害评估
 
 ---
 
-## 🚀 快速开始
+## 改进内容（相对于原 ChangeFormer）
+
+### 1. 数据增强
+- 随机旋转（90°/180°/270°）
+- 水平/垂直翻转
+- 颜色抖动（亮度/对比度/饱和度 ±0.5）
+- 高斯模糊
+- 随机裁放（0.8x ~ 1.3x）
+
+### 2. 加权 CrossEntropy Loss
+- 变化类权重设为 3.0，解决正负样本不均衡（变化像素远少于背景）
+- 通过 `--loss_weight 1.0 3.0` 参数控制
+
+### 3. Label Smoothing
+- 设置为 0.1，软化标签防止过拟合
+- 通过 `--label_smoothing 0.1` 参数控制
+
+### 4. Cosine Annealing LR
+- 学习率从初始值平滑衰减到 1e-7，训练后期更稳定
+- 通过 `--lr_policy cosine` 参数控制
+
+---
+
+## 实验结果
+
+### 数据集
+- **训练集**: 105 对影像（LabelMe 手动标注）
+- **验证集**: 14 对影像
+- **测试集**: 32 对影像
+
+### 模型对比（测试集）
+
+| 模型 | 预训练数据 | mF1 | 变化类 F1 | Precision | Recall |
+|------|-----------|-----|----------|-----------|--------|
+| LEVIR 微调 | LEVIR-CD (637对) | **0.761** | **0.556** | 0.794 | **0.428** |
+| DSIFN 微调 | DSIFN-CD (3940对) | 0.689 | 0.417 | **0.799** | 0.282 |
+
+### 训练过程（LEVIR 微调）
+
+| 指标 | Epoch 0（初始） | Best (Epoch 45) | 提升 |
+|------|----------------|-----------------|------|
+| mF1 | 0.524 | 0.713 | +36% |
+| 变化类 F1 | 0.135 | 0.460 | +241% |
+| 变化类 Precision | 0.121 | 0.742 | +513% |
+| 变化类 Recall | 0.152 | 0.333 | +119% |
+| 整体 Accuracy | 0.844 | 0.937 | +11% |
+
+> 模型初始状态下完全检测不到变化区域（F1=0），经微调后变化类 F1 达到 0.556，验证了预训练特征的有效迁移。
+
+---
+
+## 快速开始
 
 ### 环境要求
-
 ```
-Python 3.8.0
-PyTorch 1.10.1
-torchvision 0.11.2
-einops 0.3.2
+Python 3.8+
+PyTorch 1.10+
+torchvision
+einops
 ```
 
-### 安装环境
-
+### 安装
 ```bash
-# 创建conda环境
-conda create --name ChangeFormerV5 --file requirements.txt
-conda activate ChangeFormerV5
-```
-
-### 克隆项目
-
-```bash
-git clone https://github.com/S14260/ChangeFormer-Learning.git
-cd ChangeFormer-Learning
+conda create --name ChangeFormer python=3.8
+conda activate ChangeFormer
+pip install torch torchvision einops pillow numpy
 ```
 
 ---
 
-## 📁 数据集准备
+## 使用方法
 
-### 数据目录结构
+### 1. 微调训练
 
-```
-数据集文件夹/
-├─ A/          # t1时期影像
-├─ B/          # t2时期影像
-├─ label/      # 变化标签图（黑白）
-└─ list/       # 文件列表
-    ├─ train.txt   # 训练集文件名列表
-    ├─ val.txt     # 验证集文件名列表
-    └─ test.txt    # 测试集文件名列表
-```
-
-### 下载数据集
-
-**LEVIR-CD-256 数据集**: [点击下载](https://www.dropbox.com/s/18fb5jo0npu5evm/LEVIR-CD256.zip)
-
-**DSIFN-CD-256 数据集**: [点击下载](https://www.dropbox.com/s/18fb5jo0npu5evm/LEVIR-CD256.zip)
-
----
-
-## 🎯 快速演示
-
-### 在 LEVIR 数据集上测试
-
-1. 下载预训练模型: [`Github-LEVIR-Pretrained`](https://github.com/wgcban/ChangeFormer/releases/download/v0.1.0/CD_ChangeFormerV6_LEVIR_b16_lr0.0001_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256.zip)
-
-2. 将模型放置到 `checkpoints/ChangeFormer_LEVIR/` 目录
-
-3. 运行演示:
 ```bash
-python demo_LEVIR.py
+# LEVIR 预训练权重微调（推荐）
+python finetune_LEVIR.py
+
+# DSIFN 预训练权重微调
+python finetune_DSIFN.py
 ```
 
-4. 结果保存在 `samples_LEVIR/predict_CD_ChangeFormerV6/`
+### 2. 推理
 
-### 在 DSIFN 数据集上测试
-
-1. 下载预训练模型: [`Github-DSIFN-Pretrained`](https://github.com/wgcban/ChangeFormer/releases/download/v0.1.0/CD_ChangeFormerV6_DSIFN_b16_lr0.00006_adamw_train_test_200_linear_ce_multi_train_True_multi_infer_False_shuffle_AB_False_embed_dim_256.zip)
-
-2. 将模型放置到 `checkpoints/ChangeFormer_DSIFN/` 目录
-
-3. 运行演示:
 ```bash
-python demo_DSIFN.py
+# 用 LEVIR 微调模型推理测试集
+python infer_tianjin.py --model finetune_LEVIR --data_name tianjin_wayback --split test --output_folder output_finetune_LEVIR_test
+
+# 用 DSIFN 微调模型推理测试集
+python infer_tianjin.py --model finetune_DSIFN --data_name tianjin_wayback --split test --output_folder output_finetune_DSIFN_test
+
+# 用原版 LEVIR 预训练模型推理
+python infer_tianjin.py --model levir --data_name tianjin_wayback --split test
+```
+
+### 3. 结果对比
+
+```bash
+# 生成 LEVIR vs DSIFN 预测对比图
+python compare_models.py
 ```
 
 ---
 
-## 🏋️ 模型训练
-
-### 训练参数说明
+## 训练参数
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `batch_size` | 16 | 批次大小 |
-| `lr` | 0.0001 | 学习率 |
-| `max_epochs` | 200 | 训练轮数 |
-| `img_size` | 256 | 输入图像尺寸 |
-| `embed_dim` | 256 | Transformer嵌入维度 |
-| `net_G` | ChangeFormerV6 | 网络版本 |
-| `optimizer` | adamw | 优化器 (sgd/adam/adamw) |
-| `loss` | ce | 损失函数 (ce/fl/miou) |
-
-### 训练命令
-
-```bash
-python main_cd.py \
-    --data_name LEVIR \
-    --batch_size 16 \
-    --lr 0.0001 \
-    --max_epochs 200 \
-    --net_G ChangeFormerV6 \
-    --optimizer adamw \
-    --loss ce \
-    --embed_dim 256
-```
-
-### 使用预训练权重加速收敛
-
-```bash
-# 下载预训练的SegFormer权重
-wget https://www.dropbox.com/s/undtrlxiz7bkag5/pretrained_changeformer.pt
-
-# 训练时指定预训练路径
-python main_cd.py --pretrain path/to/pretrained_changeformer.pt ...
-```
+| `--data_name` | tianjin_wayback | 数据集名称 |
+| `--batch_size` | 4 | 批次大小 |
+| `--lr` | 0.00006 | 学习率（微调用小学习率） |
+| `--max_epochs` | 50 | 训练轮数 |
+| `--embed_dim` | 256 | Transformer 嵌入维度 |
+| `--net_G` | ChangeFormerV6 | 网络版本 |
+| `--optimizer` | adamw | 优化器 |
+| `--loss` | ce | 损失函数 |
+| `--loss_weight` | 1.0 3.0 | 类别权重 [背景, 变化] |
+| `--label_smoothing` | 0.1 | 标签平滑系数 |
+| `--lr_policy` | cosine | 学习率策略 (linear/cosine/step) |
 
 ---
 
-## 📈 模型评估
+## 数据集结构
 
-```bash
-python eval_cd.py \
-    --data_name LEVIR \
-    --net_G ChangeFormerV6 \
-    --split test \
-    --checkpoint_name best_ckpt.pt
 ```
+datasets/tianjin_wayback/
+├── train/
+│   ├── A/          # 前期影像
+│   ├── B/          # 后期影像
+│   ├── label/      # 二值标签（0=背景, 255=变化）
+│   └── list/
+│       └── train.txt
+├── val/
+│   ├── A/, B/, label/
+│   └── list/val.txt
+└── test/
+    ├── A/, B/, label/
+    └── list/test.txt
+```
+
+### 标注工具
+使用 [LabelMe](https://github.com/labelmeai/labelme) 进行多边形标注，标注后用 `convert_labelme_to_mask.py` 转换为二值 mask。
 
 ---
 
-## 📂 项目结构
+## 项目结构
 
 ```
 ChangeFormer/
 ├── models/
-│   ├── ChangeFormer.py      # ChangeFormer网络定义
-│   ├── trainer.py           # 训练器
-│   ├── evaluator.py         # 评估器
-│   └── networks.py          # 网络构建
+│   ├── ChangeFormer.py      # ChangeFormer 网络定义
+│   ├── trainer.py           # 训练器（支持加权Loss、Label Smoothing）
+│   ├── losses.py            # 损失函数（支持 label_smoothing）
+│   └── networks.py          # 网络构建（支持 cosine LR）
+├── datasets/
+│   ├── CD_dataset.py        # 数据集类（支持旋转增强）
+│   ├── data_utils.py        # 数据增强工具
+│   └── tianjin_wayback/     # 天津 Wayback 数据集
 ├── main_cd.py               # 训练入口
-├── eval_cd.py               # 评估入口
-├── demo_LEVIR.py            # LEVIR演示脚本
-├── demo_DSIFN.py            # DSIFN演示脚本
+├── finetune_LEVIR.py        # LEVIR 微调脚本（集成所有改进）
+├── finetune_DSIFN.py        # DSIFN 微调脚本
+├── infer_tianjin.py         # 通用推理脚本
+├── compare_models.py        # 模型对比可视化
 ├── data_config.py           # 数据集配置
-├── utils.py                 # 工具函数
-├── checkpoints/             # 模型权重（不上传）
-├── vis/                     # 可视化结果（不上传）
-└── scripts/                 # 训练/评估脚本
+└── checkpoints/             # 模型权重（已 gitignore）
 ```
 
 ---
 
-## 🔧 本项目的改进
+## 引用
 
-在原项目基础上，本项目做了以下改进：
-
-### 1. 兼容性修复
-- 修复 `np.str` 弃用问题（改为 `str`）
-- 修复 PyTorch `weights_only` 参数警告
-- 修复 `F.interpolate` 使用 `size` 替代 `scale_factor` 的兼容性问题
-
-### 2. Windows 环境适配
-- 修改文件路径为 Windows 格式
-- 适配本地 checkpoint 存储路径
-
-### 3. 添加中文注释
-- 在训练流程中添加详细中文注释
-- 帮助理解训练、验证、保存三个阶段
-
----
-
-## 📝 引用
-
-如果本项目对您的研究有帮助，请引用原论文：
+如果本项目对您有帮助，请引用原论文：
 
 ```bibtex
 @INPROCEEDINGS{9883686,
@@ -222,11 +200,11 @@ ChangeFormer/
 
 ---
 
-## 📄 许可证
+## 许可证
 
 本代码仅用于非商业和研究目的。商业用途请联系原作者。
 
-## 🙏 致谢
+## 致谢
 
-感谢以下项目的支持：
+- [ChangeFormer](https://github.com/wgcban/ChangeFormer) - 原始实现
 - [BIT_CD](https://github.com/justchenhao/BIT_CD) - ChangeFormer 基于此代码库实现
