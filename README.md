@@ -16,22 +16,25 @@
 
 ## 改进内容（相对于原 ChangeFormer）
 
-### 1. 数据增强
+### 1. Bug 修复
+- 修复数据增强裁剪时 label 填充值错误（255→0），避免裁剪区域被误标为"变化"
+
+### 2. 数据增强
 - 随机旋转（90°/180°/270°）
 - 水平/垂直翻转
 - 颜色抖动（亮度/对比度/饱和度 ±0.5）
 - 高斯模糊
 - 随机裁放（0.8x ~ 1.3x）
 
-### 2. 加权 CrossEntropy Loss
+### 3. 加权 CrossEntropy Loss
 - 变化类权重设为 3.0，解决正负样本不均衡（变化像素远少于背景）
 - 通过 `--loss_weight 1.0 3.0` 参数控制
 
-### 3. Label Smoothing
+### 4. Label Smoothing
 - 设置为 0.1，软化标签防止过拟合
 - 通过 `--label_smoothing 0.1` 参数控制
 
-### 4. Cosine Annealing LR
+### 5. Cosine Annealing LR
 - 学习率从初始值平滑衰减到 1e-7，训练后期更稳定
 - 通过 `--lr_policy cosine` 参数控制
 
@@ -48,20 +51,30 @@
 
 | 模型 | 预训练数据 | mF1 | 变化类 F1 | Precision | Recall |
 |------|-----------|-----|----------|-----------|--------|
-| LEVIR 微调 | LEVIR-CD (637对) | **0.761** | **0.556** | 0.794 | **0.428** |
-| DSIFN 微调 | DSIFN-CD (3940对) | 0.689 | 0.417 | **0.799** | 0.282 |
+| LEVIR 微调（原始） | LEVIR-CD (637对) | 0.761 | 0.556 | 0.794 | 0.428 |
+| DSIFN 微调 | DSIFN-CD (3940对) | 0.689 | 0.417 | 0.799 | 0.282 |
+| **LEVIR 微调（增强版）** | LEVIR-CD (637对) | **0.782** | **0.601** | 0.650 | **0.560** |
 
-### 训练过程（LEVIR 微调）
+> 增强版相比原始 LEVIR 微调：mF1 +2.1%，变化类 F1 +4.5%，Recall +31%（0.428→0.560）
 
-| 指标 | Epoch 0（初始） | Best (Epoch 45) | 提升 |
+### 训练过程对比（增强版）
+
+| 指标 | Epoch 0（初始） | Best (Epoch 42) | 提升 |
 |------|----------------|-----------------|------|
-| mF1 | 0.524 | 0.713 | +36% |
-| 变化类 F1 | 0.135 | 0.460 | +241% |
-| 变化类 Precision | 0.121 | 0.742 | +513% |
-| 变化类 Recall | 0.152 | 0.333 | +119% |
-| 整体 Accuracy | 0.844 | 0.937 | +11% |
+| mF1 | 0.528 | 0.679 | +29% |
+| 变化类 F1 | 0.160 | 0.395 | +147% |
+| 变化类 Precision | 0.120 | 0.435 | +263% |
+| 变化类 Recall | 0.238 | 0.362 | +52% |
+| 整体 Accuracy | 0.817 | 0.931 | +14% |
 
-> 模型初始状态下完全检测不到变化区域（F1=0），经微调后变化类 F1 达到 0.556，验证了预训练特征的有效迁移。
+### 可视化结果
+
+<!-- TODO: 替换为实际图片 -->
+![LEVIR vs DSIFN 对比](./images/comparison_levir_vs_dsifn.png)
+
+![训练曲线](./images/training_curve.png)
+
+![预测结果示例](./images/prediction_examples.png)
 
 ---
 
@@ -73,6 +86,8 @@ Python 3.8+
 PyTorch 1.10+
 torchvision
 einops
+pillow
+numpy
 ```
 
 ### 安装
@@ -89,7 +104,7 @@ pip install torch torchvision einops pillow numpy
 ### 1. 微调训练
 
 ```bash
-# LEVIR 预训练权重微调（推荐）
+# LEVIR 预训练权重微调（推荐，增强版）
 python finetune_LEVIR.py
 
 # DSIFN 预训练权重微调
@@ -99,7 +114,7 @@ python finetune_DSIFN.py
 ### 2. 推理
 
 ```bash
-# 用 LEVIR 微调模型推理测试集
+# 用增强版 LEVIR 微调模型推理测试集
 python infer_tianjin.py --model finetune_LEVIR --data_name tianjin_wayback --split test --output_folder output_finetune_LEVIR_test
 
 # 用 DSIFN 微调模型推理测试集
@@ -170,10 +185,10 @@ ChangeFormer/
 │   └── networks.py          # 网络构建（支持 cosine LR）
 ├── datasets/
 │   ├── CD_dataset.py        # 数据集类（支持旋转增强）
-│   ├── data_utils.py        # 数据增强工具
+│   ├── data_utils.py        # 数据增强工具（已修复裁剪bug）
 │   └── tianjin_wayback/     # 天津 Wayback 数据集
 ├── main_cd.py               # 训练入口
-├── finetune_LEVIR.py        # LEVIR 微调脚本（集成所有改进）
+├── finetune_LEVIR.py        # LEVIR 增强微调脚本（推荐）
 ├── finetune_DSIFN.py        # DSIFN 微调脚本
 ├── infer_tianjin.py         # 通用推理脚本
 ├── compare_models.py        # 模型对比可视化

@@ -111,7 +111,7 @@ class CDDataAugmentation:
             box = get_random_crop_box(imgsize=imgsize, cropsize=self.img_size)
             imgs = [pil_crop(img, box, cropsize=self.img_size, default_value=0)
                     for img in imgs]
-            labels = [pil_crop(img, box, cropsize=self.img_size, default_value=255)
+            labels = [pil_crop(img, box, cropsize=self.img_size, default_value=0)
                     for img in labels]
 
         if self.with_random_blur and random.random() > 0:
