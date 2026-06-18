@@ -46,18 +46,59 @@
 - **训练集**: 105 对影像（LabelMe 手动标注）
 - **验证集**: 14 对影像
 - **测试集**: 32 对影像
+- **影像来源**: ArcGIS Wayback 历史遥感影像（256×256 像素）
+- **标注方式**: LabelMe 多边形标注 → 二值 mask（0=背景, 255=变化）
 
-### 模型对比（测试集）
+### 微调配置对比
 
-| 模型 | 预训练数据 | mF1 | 变化类 F1 | Precision | Recall |
-|------|-----------|-----|----------|-----------|--------|
-| LEVIR 微调（原始） | LEVIR-CD (637对) | 0.761 | 0.556 | 0.794 | 0.428 |
-| DSIFN 微调 | DSIFN-CD (3940对) | 0.689 | 0.417 | 0.799 | 0.282 |
-| **LEVIR 微调（增强版）** | LEVIR-CD (637对) | **0.782** | **0.601** | 0.650 | **0.560** |
+三个模型均基于 ChangeFormerV6 架构，在不同预训练权重和训练策略下微调 50 个 epoch：
 
-> 增强版相比原始 LEVIR 微调：mF1 +2.1%，变化类 F1 +4.5%，Recall +31%（0.428→0.560）
+| 配置项 | LEVIR-base | DSIFN-base | LEVIR-enhanced |
+|--------|-----------|-----------|----------------|
+| 预训练源 | LEVIR-CD (637对) | DSIFN-CD (3940对) | LEVIR-CD (637对) |
+| 学习率 | 6e-5 | 6e-5 | 6e-5 |
+| 学习率策略 | linear | linear | **cosine** |
+| 批次大小 | 4 | 4 | 4 |
+| 多尺度训练 | False | True | **True** |
+| 损失函数 | CE | CE | **CE + 加权** |
+| 变化类权重 | 1.0 | 1.0 | **3.0** |
+| Label Smoothing | 0 | 0 | **0.1** |
+| 优化器 | AdamW | AdamW | AdamW |
+| 最佳验证 epoch | 45 | 36 | 42 |
 
-### 训练过程对比（增强版）
+### 测试集指标对比
+
+| 模型 | mF1 | mIoU | 变化类 F1 | 变化类 IoU | 变化类 Precision | 变化类 Recall |
+|------|-----|------|----------|-----------|-----------------|--------------|
+| LEVIR-base | 0.761 | 0.660 | 0.556 | 0.385 | **0.794** | 0.428 |
+| DSIFN-base | 0.689 | 0.594 | 0.417 | 0.263 | 0.799 | 0.282 |
+| **LEVIR-enhanced** | **0.782** | **0.679** | **0.601** | **0.430** | 0.650 | **0.560** |
+
+> **LEVIR-enhanced 相比 LEVIR-base**: mF1 +2.1%, 变化类 F1 +4.5%, Recall +31%（0.428→0.560）
+>
+> **LEVIR-enhanced 相比 DSIFN-base**: mF1 +9.3%, 变化类 F1 +18.4%, Recall +99%（0.282→0.560）
+
+### 关键发现
+
+**1. 预训练源选择：LEVIR > DSIFN**
+- DSIFN 虽然数据量更大（3940对 vs 637对），但在天津 Wayback 数据上泛化效果差
+- DSIFN 的 recall_1 仅 0.282，大量变化区域漏检
+- LEVIR 的建筑变化场景与天津 Wayback 更接近，迁移效果更好
+
+**2. 加权损失显著提升 Recall**
+- 变化类权重 3.0 使模型不再偏向"全预测为背景"
+- Recall 从 0.428 提升到 0.560（+31%），代价是 Precision 略降（0.794→0.650）
+- 对于变化检测任务，漏检（低 Recall）比误报（低 Precision）代价更大
+
+**3. Cosine LR + Label Smoothing 提升训练稳定性**
+- Cosine 学习率衰减使后期学习率更低，有助于精细调优
+- Label Smoothing 0.1 缓解过拟合，验证集表现更稳定
+
+**4. 多尺度训练的贡献**
+- DSIFN-base 和 LEVIR-enhanced 均启用多尺度训练
+- 多尺度训练增强模型对不同尺度变化的感知能力
+
+### 训练过程对比（LEVIR-enhanced）
 
 | 指标 | Epoch 0（初始） | Best (Epoch 42) | 提升 |
 |------|----------------|-----------------|------|
@@ -70,11 +111,21 @@
 ### 可视化结果
 
 <!-- TODO: 替换为实际图片 -->
-![LEVIR vs DSIFN 对比](./images/comparison_levir_vs_dsifn.png)
+**三模型测试集指标对比**
 
-![训练曲线](./images/training_curve.png)
+![三模型指标对比](./images/finetune_metrics_comparison.png)
 
-![预测结果示例](./images/prediction_examples.png)
+**训练曲线对比**
+
+![训练曲线对比](./images/finetune_training_curves.png)
+
+**LEVIR-enhanced 预测结果示例**
+
+![LEVIR-enhanced 预测结果](./images/finetune_levir_enhanced_predictions.png)
+
+**三模型预测结果对比**
+
+![三模型预测对比](./images/finetune_prediction_comparison.png)
 
 ---
 
