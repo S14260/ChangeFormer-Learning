@@ -11,8 +11,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 A_DIR = r"E:\changeformer\ChangeFormer\datasets\tianjin_wayback\test\A"
 B_DIR = r"E:\changeformer\ChangeFormer\datasets\tianjin_wayback\test\B"
-PRED_DIR = r"E:\changeformer\ChangeFormer\output_finetune_DSIFN_tianjinWayback"
-OUT_DIR = r"E:\changeformer\ChangeFormer\output_finetune_DSIFN_tianjinWayback\vis"
+PRED_DIR = r"E:\changeformer\ChangeFormer\output_finetune_LEVIR_enhanced_tianjinWayback"
+OUT_DIR = r"E:\changeformer\ChangeFormer\output_finetune_LEVIR_enhanced_tianjinWayback\vis"
 
 IMG_SIZE = (256, 256)  # 展示尺寸
 

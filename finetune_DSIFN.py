@@ -44,7 +44,7 @@ def main():
         # 输出目录
         "checkpoint_root": "./checkpoints",
         "vis_root": "./vis",
-        "project_name": "finetune_tianjin_wayback_from_DSIFN_lr0.00006_e50_b16",
+        "project_name": "finetune_tianjin_wayback_from_DSIFN_lr0.00006_e50_b4",
     }
 
     # 构建命令

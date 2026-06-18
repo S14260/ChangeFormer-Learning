@@ -40,11 +40,15 @@ MODEL_CONFIGS = {
         'checkpoint_root': r'E:\changeformer\ChangeFormer\checkpoints\ChangeFormer_DSIFN',
     },
     'finetune_LEVIR': {
-        'project_name': 'finetune_tianjin_wayback_from_LEVIR_lr0.00006_e50_b16',
+        'project_name': 'finetune_tianjin_wayback_from_LEVIR_lr0.00006_e50_b4',
         'checkpoint_root': r'E:\changeformer\ChangeFormer\checkpoints',
     },
     'finetune_DSIFN': {
-        'project_name': 'finetune_tianjin_wayback_from_DSIFN_lr0.00006_e50_b16',
+        'project_name': 'finetune_tianjin_wayback_from_DSIFN_lr0.00006_e50_b4',
+        'checkpoint_root': r'E:\changeformer\ChangeFormer\checkpoints',
+    },
+    'finetune_LEVIR_enhanced': {
+        'project_name': 'finetune_tianjin_wayback_from_LEVIR_enhanced_e50_b4',
         'checkpoint_root': r'E:\changeformer\ChangeFormer\checkpoints',
     },
 }
@@ -52,8 +56,8 @@ MODEL_CONFIGS = {
 
 def get_args():
     parser = ArgumentParser(description='ChangeFormer 通用推理脚本')
-    parser.add_argument('--model', type=str, default='levir', choices=['levir', 'dsifn', 'finetune_LEVIR', 'finetune_DSIFN'],
-                        help='预训练模型: levir, dsifn 或 finetune_LEVIR 或 finetune_DSIFN')
+    parser.add_argument('--model', type=str, default='levir', choices=['levir', 'dsifn', 'finetune_LEVIR', 'finetune_DSIFN','finetune_LEVIR_enhanced'],
+                        help='预训练模型: levir, dsifn 或 finetune_LEVIR 或 finetune_DSIFN 或 finetune_LEVIR_enhanced')
     parser.add_argument('--data_name', type=str, default='tianjin_wayback',
                         help='数据集名称 (通过 data_config.py 查找，如 tianjin_cd, tianjin_wayback)')
     parser.add_argument('--data_dir', type=str, default=None,
